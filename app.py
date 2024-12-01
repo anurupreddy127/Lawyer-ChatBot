@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 # Congress.gov API configuration
-# Replace with your actual API key
 API_KEY = "62IOPonysOx2wbWE1rawvQaf02ufD09zOlSgWrvK"
 BASE_URL = "https://api.congress.gov/v3"
 
@@ -32,22 +31,29 @@ def get_law():
     headers = {"X-Api-Key": API_KEY}
     response = requests.get(url, headers=headers)
 
+    # Log the raw API response for debugging purposes
+    print(response.json())  # Log the raw response data
+
     if response.status_code == 200:
         data = response.json()
         bills = data.get("bills", [])
         formatted_bills = []
 
-        # Format the data to exclude the URL field
-        for bill in bills:
-            formatted_bills.append({
-                "title": bill.get("title", "No title available"),
-                "number": bill.get("number", "No number available"),
-                "congress": bill.get("congress", "No congress session info"),
-                "originChamber": bill.get("originChamber", "Unknown"),
-                "latestAction": bill.get("latestAction", {}).get("text", "No recent action")
-            })
+        # Format the data to exclude the URL field and handle multiple results
+        if bills:
+            for bill in bills:
+                formatted_bills.append({
+                    "title": bill.get("title", "No title available"),
+                    "number": bill.get("number", "No number available"),
+                    "congress": bill.get("congress", "No congress session info"),
+                    "originChamber": bill.get("originChamber", "Unknown"),
+                    "latestAction": bill.get("latestAction", {}).get("text", "No recent action")
+                })
 
-        return jsonify({"query": query, "results": formatted_bills})
+            return jsonify({"query": query, "results": formatted_bills})
+        else:
+            return jsonify({"error": "No bills found matching your query."})
+
     else:
         return jsonify({"error": f"Unable to fetch data. Status code: {response.status_code}"}), response.status_code
 

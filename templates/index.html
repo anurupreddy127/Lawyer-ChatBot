@@ -46,6 +46,16 @@
         border-radius: 4px;
         cursor: pointer;
       }
+      /* Style for red color */
+      .user-message span,
+      .bot-message span {
+        color: red;
+        font-weight: bold;
+      }
+      .user-message,
+      .bot-message {
+        color: black; /* Default color for the message content */
+      }
     </style>
   </head>
   <body>
@@ -68,9 +78,10 @@
 
         const chatBox = document.getElementById("chat-box");
 
-        // Add user's message to the chatbox
+        // Add user's message to the chatbox with red "You"
         const userMessage = document.createElement("div");
-        userMessage.textContent = "You: " + userInput;
+        userMessage.classList.add("user-message");
+        userMessage.innerHTML = `<span>You:</span> ${userInput}`;
         chatBox.appendChild(userMessage);
 
         // Fetch chatbot response
@@ -81,12 +92,13 @@
           const data = await response.json();
 
           const botMessage = document.createElement("div");
+          botMessage.classList.add("bot-message");
           if (data.error) {
-            botMessage.textContent = "Bot: " + data.error;
+            botMessage.innerHTML = `<span>Bot:</span> ${data.error}`;
           } else if (data.results && data.results.length > 0) {
             const result = data.results[0];
             botMessage.innerHTML = `
-              <strong>Bot:</strong><br>
+              <span>Bot:</span><br>
               <strong>Title:</strong> ${result.title}<br>
               <strong>Number:</strong> ${result.number}<br>
               <strong>Congress:</strong> ${result.congress}<br>
@@ -94,13 +106,13 @@
               <strong>Latest Action:</strong> ${result.latestAction}
             `;
           } else {
-            botMessage.textContent = "Bot: No results found for your query.";
+            botMessage.innerHTML = `<span>Bot:</span> No results found for your query.`;
           }
           chatBox.appendChild(botMessage);
         } catch (error) {
           const botMessage = document.createElement("div");
-          botMessage.textContent =
-            "Bot: Sorry, there was an error fetching the response.";
+          botMessage.classList.add("bot-message");
+          botMessage.innerHTML = `<span>Bot:</span> Sorry, there was an error fetching the response.`;
           chatBox.appendChild(botMessage);
         }
 
